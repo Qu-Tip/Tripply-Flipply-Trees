@@ -58,7 +58,11 @@
       * @param imIn - the input image used to construct the tree
       */
 TripleTree::TripleTree(PNG& imIn) {
-    // add your implementation below
+    
+    unsigned int width = imIn.width();
+    unsigned int height = imIn.height();
+    pair<unsigned int, unsigned int> ul = make_pair(0, 0);
+    root = BuildNode(imIn, ul, width, height);
 	
 }
 
@@ -155,8 +159,36 @@ void TripleTree::Copy(const TripleTree& other) {
  * @param h - height of node to be built's rectangle.
  */
 Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned int w, unsigned int h) {
-    // replace the line below with your implementation
-    return nullptr;
+
+    Node* n = new Node(ul, w, h);
+    // Node* n;
+
+    if (w == 1 || h == 1) {
+        RGBAPixel* pixel = im.getPixel(ul.first, ul.second);
+        n->avg = *pixel;
+        return n;
+    }
+
+    pair<unsigned int, unsigned int> A = ul;
+    pair<unsigned int, unsigned int> B;
+    pair<unsigned int, unsigned int> C;
+
+    if (w >= h) {        // split wide
+        B = make_pair(ul.first + (w / 3), ul.second);
+        C = make_pair(ul.first + (w * 2) / 3, ul.second);
+        n->A = BuildNode(im, A, w/3, h);
+        n->B = BuildNode(im, B, w/3, h);
+        n->C = BuildNode(im, C, w/3, h);
+
+    } else {            // split tall
+        B = make_pair(ul.first, ul.second + (h / 3));
+        C = make_pair(ul.first, ul.second + (h * 2) / 3);
+        n->A = BuildNode(im, A, w, h/3);
+        n->B = BuildNode(im, B, w, h/3);
+        n->C = BuildNode(im, C, w, h/3);
+    }
+
+    return n;
 }
 
 /* ===== IF YOU HAVE DEFINED PRIVATE MEMBER FUNCTIONS IN tripletree_private.h, IMPLEMENT THEM HERE ====== */
