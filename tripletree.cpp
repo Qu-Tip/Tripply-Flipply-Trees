@@ -161,9 +161,8 @@ void TripleTree::Copy(const TripleTree& other) {
 Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsigned int w, unsigned int h) {
 
     Node* n = new Node(ul, w, h);
-    // Node* n;
 
-    if (w == 1 || h == 1) {
+    if (w < 2 && h < 2) {
         RGBAPixel* pixel = im.getPixel(ul.first, ul.second);
         n->avg = *pixel;
         return n;
@@ -173,20 +172,91 @@ Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsign
     pair<unsigned int, unsigned int> B;
     pair<unsigned int, unsigned int> C;
 
-    if (w >= h) {        // split wide
-        B = make_pair(ul.first + (w / 3), ul.second);
-        C = make_pair(ul.first + (w * 2) / 3, ul.second);
-        n->A = BuildNode(im, A, w/3, h);
-        n->B = BuildNode(im, B, w/3, h);
-        n->C = BuildNode(im, C, w/3, h);
+    if (w >= h) {                                                           // split wide
 
-    } else {            // split tall
-        B = make_pair(ul.first, ul.second + (h / 3));
-        C = make_pair(ul.first, ul.second + (h * 2) / 3);
-        n->A = BuildNode(im, A, w, h/3);
-        n->B = BuildNode(im, B, w, h/3);
-        n->C = BuildNode(im, C, w, h/3);
+        if (w == 2) {
+            C = make_pair(ul.first + (w / 2), ul.second);
+            n->A = BuildNode(im, A, w/2, h);
+            n->C = BuildNode(im, C, w/2, h);
+
+            double redAvg = (n->A->avg.r + n->C->avg.r) / 2;
+            double greenAvg = (n->A->avg.g + n->C->avg.g) / 2;
+            double blueAvg = (n->A->avg.b + n->C->avg.b) / 2;
+            double alphaAvg = (n->A->avg.a + n->C->avg.a) / 2;
+
+            n->avg = RGBAPixel(redAvg, greenAvg, blueAvg, alphaAvg);
+
+            return n;
+        }
+
+        if (w % 3 == 1) {
+            B = make_pair(ul.first + (w / 3), ul.second);       
+            C = make_pair(ul.first + (w / 3) + (w / 3) + 1, ul.second);     // + 1 since B gets extra pixel
+            n->A = BuildNode(im, A, w/3, h);
+            n->B = BuildNode(im, B, w/3 + 1, h);
+            n->C = BuildNode(im, C, w/3, h);
+
+        } else if (w % 3 == 2 && w != 2) {
+            B = make_pair(ul.first + (w / 3) + 1, ul.second);               // + 1 since A gets extra pixel
+            C = make_pair(ul.first + (w / 3) + (w / 3) + 1, ul.second);     // + 1 since A gets extra pixel
+            n->A = BuildNode(im, A, w/3 + 1, h);                            // extra pixel for A
+            n->B = BuildNode(im, B, w/3, h);
+            n->C = BuildNode(im, C, w/3 + 1, h);                            // extra pixel for C
+
+        } else {
+            B = make_pair(ul.first + (w / 3), ul.second);
+            C = make_pair(ul.first + (w / 3) + (w / 3), ul.second);
+            n->A = BuildNode(im, A, w/3, h);
+            n->B = BuildNode(im, B, w/3, h);
+            n->C = BuildNode(im, C, w/3, h);
+        }
+
+    } else {                                                                // split tall
+
+        if (h == 2) {
+            C = make_pair(ul.first, ul.second + (h / 2));
+            n->A = BuildNode(im, A, w, h/2);
+            n->C = BuildNode(im, C, w, h/2);
+
+            double redAvg = (n->A->avg.r + n->C->avg.r) / 2;
+            double greenAvg = (n->A->avg.g + n->C->avg.g) / 2;
+            double blueAvg = (n->A->avg.b + n->C->avg.b) / 2;
+            double alphaAvg = (n->A->avg.a + n->C->avg.a) / 2;
+
+            n->avg = RGBAPixel(redAvg, greenAvg, blueAvg, alphaAvg);
+
+            return n;
+        }
+
+        if (h % 3 == 1) {
+            B = make_pair(ul.first, ul.second + (h / 3));
+            C = make_pair(ul.first, ul.second + (h / 3) + (h / 3) + 1);
+            n->A = BuildNode(im, A, w, h/3);
+            n->B = BuildNode(im, B, w, h/3 + 1);
+            n->C = BuildNode(im, C, w, h/3);
+
+        } else if (h % 3 == 2 && h != 2) {
+            B = make_pair(ul.first, ul.second + (h / 3) + 1);
+            C = make_pair(ul.first, ul.second + (h / 3) + (h / 3) + 1);
+            n->A = BuildNode(im, A, w, h/3 + 1);
+            n->B = BuildNode(im, B, w, h/3);
+            n->C = BuildNode(im, C, w, h/3 + 1);
+
+        } else {
+            B = make_pair(ul.first, ul.second + (h / 3));
+            C = make_pair(ul.first, ul.second + (h / 3) + (h / 3));
+            n->A = BuildNode(im, A, w, h/3);
+            n->B = BuildNode(im, B, w, h/3);
+            n->C = BuildNode(im, C, w, h/3);
+        }
     }
+
+    double redAvg = (n->A->avg.r + n->B->avg.r + n->C->avg.r) / 3;
+    double greenAvg = (n->A->avg.g + n->B->avg.g + n->C->avg.g) / 3;
+    double blueAvg = (n->A->avg.b + n->B->avg.b + n->C->avg.b) / 3;
+    double alphaAvg = (n->A->avg.a + n->B->avg.a + n->C->avg.a) / 3;
+
+    n->avg = RGBAPixel(redAvg, greenAvg, blueAvg, alphaAvg);
 
     return n;
 }
