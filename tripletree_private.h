@@ -10,4 +10,4 @@
  */
 
  // begin your declarations below
-
+void setColorAvg(Node* n);
