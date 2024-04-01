@@ -11,3 +11,8 @@
 
  // begin your declarations below
 void setColorAvg(Node* n);
+
+void clearHelper(Node*& node);
+
+Node* copyHelper(const Node*& source);
+

@@ -135,7 +135,24 @@ int TripleTree::NumLeaves() const {
      * You may want a recursive helper function for this one.
      */
 void TripleTree::Clear() {
-    // add your implementation below
+
+    if (root == nullptr) {
+        return;
+    }
+    
+    clearHelper(root);
+    
+    /*
+    for node
+
+    if have children 
+
+    visit children
+
+    if not 
+
+    delete 
+    */
 	
 }
 
@@ -147,6 +164,7 @@ void TripleTree::Clear() {
  */
 void TripleTree::Copy(const TripleTree& other) {
     // add your implementation below
+    root = copyHelper(other.root); 
 	
 }
 
@@ -178,7 +196,7 @@ Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsign
         return n;
     } 
     
-    if ((w == 2 && h == 1) || (h == 2 && w == 1)) { // 2x1
+    if ((w == 2 && h == 1) || (h == 2 && w == 1)) { //2x1
         
         if (w > h) {
             C = make_pair(ul.first + (w / 2), ul.second);
@@ -256,6 +274,7 @@ Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsign
 
     setColorAvg(n);
     return n;
+
 }
 
 /* ===== IF YOU HAVE DEFINED PRIVATE MEMBER FUNCTIONS IN tripletree_private.h, IMPLEMENT THEM HERE ====== */
@@ -295,9 +314,57 @@ void TripleTree::setColorAvg(Node* node) {
         alphaSum += node->C->avg.a * pixelsC;
     }
 
+    // Calculate the weighted average color
     node->avg = RGBAPixel(redSum/totalPixels, greenSum/totalPixels, blueSum/totalPixels, alphaSum/totalPixels);
     // node->avg.r = redSum / totalPixels;
     // node->avg.g = greenSum / totalPixels;
     // node->avg.b = blueSum / totalPixels;
     // node->avg.a = alphaSum / totalPixels;
+
 } 
+
+void TripleTree::clearHelper(Node*& node) {
+    /*
+    clearHelper(node->A);
+    clearHelper(node->B);
+    clearHelper(node->C);
+
+
+    delete node;
+    node = nullptr; 
+*/
+
+
+    if (node->A == nullptr && node->B == nullptr && node->C == nullptr) {
+        delete node;
+        node = nullptr;
+    } else {
+        if (node->A != nullptr) {
+            clearHelper(node->A);
+        }
+        if (node->B != nullptr) {
+            clearHelper(node->B);
+        }
+        if (node->C != nullptr) {
+            clearHelper(node->C);
+        }
+    }
+    
+}
+
+Node* copyHelper(const Node* source) {
+        if (source == nullptr) {
+        return nullptr; // If the source node is null, return null.
+    }
+
+    // Create a new node that is a copy of the source node
+    Node* newNode = new Node(source->upperleft, source->width, source->height);
+    newNode->avg = source->avg; // Assuming each Node contains an 'avg' field for average color
+
+    // Copy children recursively
+    newNode->A = copyHelper(source->A);
+    newNode->B = copyHelper(source->B);
+    newNode->C = copyHelper(source->C);
+
+    return newNode; // Return the newly created copy of the node
+}
