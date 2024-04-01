@@ -14,5 +14,5 @@ void setColorAvg(Node* n);
 
 void clearHelper(Node*& node);
 
-Node* copyHelper(const Node*& source);
+Node* copyHelper(const Node* source);
 

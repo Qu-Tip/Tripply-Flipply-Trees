@@ -191,6 +191,8 @@ public:
      */
     int NumLeaves() const;
 
+    void TripleTree::clearHelper(Node*& node);
+
     /* =============== end of public PA3 FUNCTIONS =========================*/
 
 private:

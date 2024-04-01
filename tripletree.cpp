@@ -352,19 +352,17 @@ void TripleTree::clearHelper(Node*& node) {
     
 }
 
-Node* copyHelper(const Node* source) {
-        if (source == nullptr) {
-        return nullptr; // If the source node is null, return null.
+Node* TripleTree::copyHelper(const Node* source) {
+    if (source == nullptr) {
+        return nullptr; 
     }
 
-    // Create a new node that is a copy of the source node
     Node* newNode = new Node(source->upperleft, source->width, source->height);
-    newNode->avg = source->avg; // Assuming each Node contains an 'avg' field for average color
+    newNode->avg = source->avg; 
 
-    // Copy children recursively
     newNode->A = copyHelper(source->A);
     newNode->B = copyHelper(source->B);
     newNode->C = copyHelper(source->C);
 
-    return newNode; // Return the newly created copy of the node
+    return newNode;
 }
