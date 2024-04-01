@@ -126,7 +126,7 @@ void TripleTree::RotateCCW() {
  */
 int TripleTree::NumLeaves() const {
     // replace the line below with your implementation
-    return -1;
+    return countLeaves(root);
 }
 
 /**
@@ -136,10 +136,6 @@ int TripleTree::NumLeaves() const {
      */
 void TripleTree::Clear() {
 
-    if (root == nullptr) {
-        return;
-    }
-    
     clearHelper(root);
     
     /*
@@ -333,22 +329,18 @@ void TripleTree::clearHelper(Node*& node) {
     delete node;
     node = nullptr; 
 */
-
-
-    if (node->A == nullptr && node->B == nullptr && node->C == nullptr) {
-        delete node;
-        node = nullptr;
-    } else {
-        if (node->A != nullptr) {
-            clearHelper(node->A);
-        }
-        if (node->B != nullptr) {
-            clearHelper(node->B);
-        }
-        if (node->C != nullptr) {
-            clearHelper(node->C);
-        }
+    if (node == nullptr) {
+        return;
     }
+
+    clearHelper(node->A);
+    clearHelper(node->B);
+    clearHelper(node->C);
+
+    delete node;
+
+    node = nullptr;
+
     
 }
 
@@ -366,3 +358,15 @@ Node* TripleTree::copyHelper(const Node* source) {
 
     return newNode;
 }
+
+int TripleTree::countLeaves(const Node* node) const {
+        if (node == nullptr) {
+            return 0;
+        }
+
+        if (node->A == nullptr && node->B == nullptr && node->C == nullptr) {
+            return 1;
+        }
+
+        return countLeaves(node->A) + countLeaves(node->B) + countLeaves(node->C);
+    }

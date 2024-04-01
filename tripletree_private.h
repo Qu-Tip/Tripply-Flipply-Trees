@@ -16,3 +16,4 @@ void clearHelper(Node*& node);
 
 Node* copyHelper(const Node* source);
 
+int countLeaves(const Node* node) const;
