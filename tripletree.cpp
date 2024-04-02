@@ -75,8 +75,10 @@ TripleTree::TripleTree(PNG& imIn) {
  * You may want a recursive helper function for this.
  */
 PNG TripleTree::Render() const {
-    // replace the line below with your implementation
-    return PNG();
+    
+    PNG canvas(root->width, root->height);
+    RenderHelper(root, canvas);
+    return canvas;
 }
 
 /*
@@ -366,4 +368,33 @@ int TripleTree::countLeaves(const Node* node) const {
     }
 
     return countLeaves(node->A) + countLeaves(node->B) + countLeaves(node->C);
+}
+
+/*
+ * Helper function for Render
+ */
+void TripleTree::RenderHelper(Node* n, PNG& canvas) const {
+
+    if (n == nullptr) {
+        return;
+    }
+
+    // Leaf Node: 
+    if (n->A == nullptr && n->B == nullptr && n->C == nullptr) {
+
+        int width = n->width;
+        int height = n->height;
+
+        for (unsigned int x = n->upperleft.first; x < n->upperleft.first + width; x++) {
+            for (unsigned int y = n->upperleft.second; y < n->upperleft.second + height; y++) {
+                RGBAPixel* col = canvas.getPixel(x, y);
+                *col = n->avg;
+            }
+        }
+        return;
+    }
+
+    RenderHelper(n->A, canvas);
+    RenderHelper(n->B, canvas);
+    RenderHelper(n->C, canvas);
 }
