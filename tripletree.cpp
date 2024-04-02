@@ -221,7 +221,7 @@ Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsign
 
     } 
 
-    if (w > h) {                // split wide
+    if (w >= h) {                // split wide
         if (w % 3 == 1) {       // 3p+1 x q 
             B = make_pair(ul.first + (w / 3), ul.second);       
             C = make_pair(ul.first + (w / 3) + (w / 3) + 1, ul.second);     // + 1 since B gets extra pixel
@@ -229,7 +229,7 @@ Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsign
             n->B = BuildNode(im, B, w/3 + 1, h);
             n->C = BuildNode(im, C, w/3, h);
 
-        } else if (w % 3 == 2 && w != 2) {      // 3p+2 x q
+        } else if (w % 3 == 2) {      // 3p+2 x q
             B = make_pair(ul.first + (w / 3) + 1, ul.second);               // + 1 since A gets extra pixel
             C = make_pair(ul.first + (w / 3) + (w / 3) + 1, ul.second);     // + 1 since A gets extra pixel
             n->A = BuildNode(im, A, w/3 + 1, h);                            // extra pixel for A
@@ -252,7 +252,7 @@ Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsign
             n->B = BuildNode(im, B, w, h/3 + 1);
             n->C = BuildNode(im, C, w, h/3);
 
-        } else if (h % 3 == 2 && h != 2) {      // p x 3q+2
+        } else if (h % 3 == 2) {      // p x 3q+2
             B = make_pair(ul.first, ul.second + (h / 3) + 1);
             C = make_pair(ul.first, ul.second + (h / 3) + (h / 3) + 1);
             n->A = BuildNode(im, A, w, h/3 + 1);
@@ -274,6 +274,10 @@ Node* TripleTree::BuildNode(PNG& im, pair<unsigned int, unsigned int> ul, unsign
 }
 
 /* ===== IF YOU HAVE DEFINED PRIVATE MEMBER FUNCTIONS IN tripletree_private.h, IMPLEMENT THEM HERE ====== */
+
+/*
+ * Helper function for BuildNode
+ */
 void TripleTree::setColorAvg(Node* node) {
     
     if (node->A == nullptr && node->B == nullptr && node->C == nullptr) {
@@ -312,23 +316,13 @@ void TripleTree::setColorAvg(Node* node) {
 
     // Calculate the weighted average color
     node->avg = RGBAPixel(redSum/totalPixels, greenSum/totalPixels, blueSum/totalPixels, alphaSum/totalPixels);
-    // node->avg.r = redSum / totalPixels;
-    // node->avg.g = greenSum / totalPixels;
-    // node->avg.b = blueSum / totalPixels;
-    // node->avg.a = alphaSum / totalPixels;
-
 } 
 
+/*
+ * Helper function for clear
+ */
 void TripleTree::clearHelper(Node*& node) {
-    /*
-    clearHelper(node->A);
-    clearHelper(node->B);
-    clearHelper(node->C);
 
-
-    delete node;
-    node = nullptr; 
-*/
     if (node == nullptr) {
         return;
     }
@@ -338,12 +332,12 @@ void TripleTree::clearHelper(Node*& node) {
     clearHelper(node->C);
 
     delete node;
-
     node = nullptr;
-
-    
 }
 
+/*
+ * Helper function for copy
+ */
 Node* TripleTree::copyHelper(const Node* source) {
     if (source == nullptr) {
         return nullptr; 
@@ -359,14 +353,17 @@ Node* TripleTree::copyHelper(const Node* source) {
     return newNode;
 }
 
+/*
+ * Helper function for numLeaves
+ */
 int TripleTree::countLeaves(const Node* node) const {
-        if (node == nullptr) {
-            return 0;
-        }
-
-        if (node->A == nullptr && node->B == nullptr && node->C == nullptr) {
-            return 1;
-        }
-
-        return countLeaves(node->A) + countLeaves(node->B) + countLeaves(node->C);
+    if (node == nullptr) {
+        return 0;
     }
+
+    if (node->A == nullptr && node->B == nullptr && node->C == nullptr) {
+        return 1;
+    }
+
+    return countLeaves(node->A) + countLeaves(node->B) + countLeaves(node->C);
+}
