@@ -105,8 +105,7 @@ void TripleTree::Prune(double tol) {
  * You may want a recursive helper function for this.
  */
 void TripleTree::FlipHorizontal() {
-    // add your implementation below
-	
+	FlipHorizontalHelper(root);
 }
 
 /**
@@ -398,3 +397,30 @@ void TripleTree::RenderHelper(Node* n, PNG& canvas) const {
     RenderHelper(n->B, canvas);
     RenderHelper(n->C, canvas);
 }
+
+/*
+ * Helper function for FlipHorizontal
+ * swap if children exist and if it's a split wide
+ * always update upperleft
+ */
+ void TripleTree::FlipHorizontalHelper(Node* n) {
+    
+    if (n == nullptr) {
+        return;
+    }
+    
+    // if there's children
+    if (n->A != nullptr && n->C != nullptr) {
+        if (n->C->upperleft.first > n->A->upperleft.first) {        // if it's a split wide, swap children
+            Node* temp = n->A;
+            n->A = n->C;
+            n->C = temp;    
+        }
+    }
+
+    n->upperleft.first = root->width - n->upperleft.first - n->width;
+
+    FlipHorizontalHelper(n->A);
+    FlipHorizontalHelper(n->B);
+    FlipHorizontalHelper(n->C);
+ }

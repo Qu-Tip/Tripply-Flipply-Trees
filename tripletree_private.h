@@ -19,3 +19,5 @@ Node* copyHelper(const Node* source);
 int countLeaves(const Node* node) const;
 
 void RenderHelper(Node* n, PNG& canvas) const;
+
+void FlipHorizontalHelper(Node* n); 
