@@ -93,8 +93,7 @@ PNG TripleTree::Render() const {
  * @param tol - maximum allowable RGBA color distance to qualify for pruning
  */
 void TripleTree::Prune(double tol) {
-    // add your implementation below
-	
+    PruneHelper(tol, root);
 }
 
 /**
@@ -116,8 +115,7 @@ void TripleTree::FlipHorizontal() {
  * You may want a recursive helper function for this.
  */
 void TripleTree::RotateCCW() {
-    // add your implementation below
-	
+    RotateCCWHelper(root);
 }
 
 /*
@@ -126,31 +124,25 @@ void TripleTree::RotateCCW() {
  * You may want a recursive helper function for this.
  */
 int TripleTree::NumLeaves() const {
-    // replace the line below with your implementation
     return countLeaves(root);
 }
 
 /**
-     * Destroys all dynamically allocated memory associated with the
-     * current TripleTree object. To be completed for PA3.
-     * You may want a recursive helper function for this one.
-     */
+ * Destroys all dynamically allocated memory associated with the
+ * current TripleTree object. To be completed for PA3.
+ * You may want a recursive helper function for this one.
+ */
 void TripleTree::Clear() {
 
     clearHelper(root);
     
     /*
     for node
-
     if have children 
-
     visit children
-
     if not 
-
     delete 
     */
-	
 }
 
 /**
@@ -160,9 +152,7 @@ void TripleTree::Clear() {
  * @param other - The TripleTree to be copied.
  */
 void TripleTree::Copy(const TripleTree& other) {
-    // add your implementation below
     root = copyHelper(other.root); 
-	
 }
 
 /**
@@ -400,8 +390,8 @@ void TripleTree::RenderHelper(Node* n, PNG& canvas) const {
 
 /*
  * Helper function for FlipHorizontal
- * swap if children exist and if it's a split wide
- * always update upperleft
+ * - swap if children exist and if it's a split wide
+ * - always update upperleft
  */
  void TripleTree::FlipHorizontalHelper(Node* n) {
     
@@ -424,3 +414,88 @@ void TripleTree::RenderHelper(Node* n, PNG& canvas) const {
     FlipHorizontalHelper(n->B);
     FlipHorizontalHelper(n->C);
  }
+
+ /*
+  * Helper function for RotateCCW
+  * - rotate the node, not the image
+  * - do not change the avg color
+  * - if splitwide, A is on left and C is on right.
+  *   if splittall, A is on tall and C is on bottom. 
+  *   This means that A and C have to be swapped. 
+  * - (x,y) => (y, root->width - n->width - x)
+  */
+void TripleTree::RotateCCWHelper(Node* n) {
+
+    if (n == nullptr) {
+        return;
+    } 
+
+    if (n->width >= n->height) {
+        swap(n->A, n->C);
+    }
+
+    if (n->width == n->height && n->A && n->C) {
+        if (n->A->upperleft.second > n->C->upperleft.second) {
+            swap(n->A, n->C);
+        }
+    }
+
+    swap(n->width, n->height);
+    n->upperleft = {n->upperleft.second, root->height - n->upperleft.first - n->height};
+
+    if (!n->A && !n->B && !n->C) {
+        return;
+    }
+        
+    RotateCCWHelper(n->A);
+    RotateCCWHelper(n->B);
+    RotateCCWHelper(n->C);
+}
+
+ /*
+  * Helper function for Prune
+  */
+void TripleTree::PruneHelper(double tol, Node* node) {
+    if (node == nullptr || isLeaf(node)) {
+        return; // Base case: node is null or a leaf
+    }
+
+    if (shouldPrune(node, tol)) {
+        // If all leaves under this node are within the tolerance, prune this subtree
+        
+        clearHelper(node->A);
+        clearHelper(node->B);
+        clearHelper(node->C);
+
+    } else {
+        // Otherwise, recurse into children
+        PruneHelper(tol, node->A);
+        PruneHelper(tol, node->B);
+        PruneHelper(tol, node->C);
+    }
+
+}
+
+/*
+ * Helper function for PruneHelper
+ */
+bool TripleTree::isLeaf(Node* node) const {
+    return (node->A == nullptr) && (node->B == nullptr) && (node->C == nullptr);
+}
+
+/*
+ * Helper function for PruneHelper
+ */
+bool TripleTree::shouldPrune(Node* node, double tol) const {
+    if (node == nullptr) {
+        return false;
+    }
+
+    if (isLeaf(node)) {
+        return node->avg.distanceTo(root->avg) > tol;
+    } 
+
+    return shouldPrune(node->A, tol) &&
+           shouldPrune(node->B, tol) &&
+           shouldPrune(node->C, tol);  
+}

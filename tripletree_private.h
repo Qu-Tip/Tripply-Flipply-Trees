@@ -21,3 +21,11 @@ int countLeaves(const Node* node) const;
 void RenderHelper(Node* n, PNG& canvas) const;
 
 void FlipHorizontalHelper(Node* n); 
+
+void RotateCCWHelper(Node* n);
+
+void PruneHelper(double tol, Node* node);
+
+bool isLeaf(Node* node) const;
+
+bool shouldPrune(Node* node, double tol) const;
